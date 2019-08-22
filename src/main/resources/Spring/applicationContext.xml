@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--注解扫描-->
+    <context:component-scan base-package="com.xust.iot">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+
+
+    <!--引入外部配置文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--配置数据源-->
+    <bean id="DruidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="initialSize" value="${jdbc.initialSize}"/>
+        <property name="minIdle" value="${jdbc.minIdle}"/>
+        <property name="maxActive" value="${jdbc.maxActive}"/>
+        <property name="maxWait" value="${jdbc.maxWait}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}"/>
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}"/>
+        <property name="validationQuery" value="${jdbc.validationQuery}"/>
+        <property name="testWhileIdle" value="${jdbc.testWhileIdle}"/>
+        <property name="testOnBorrow" value="${jdbc.testOnBorrow}"/>
+        <property name="testOnReturn" value="${jdbc.testOnReturn}"/>
+        <property name="poolPreparedStatements" value="${jdbc.poolPreparedStatements}"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="${jdbc.maxPoolPreparedStatementPerConnectionSize}"/>
+        <property name="filters" value="${jdbc.filters}"/>
+    </bean>
+
+
+    <!--配置MyBatis-->
+    <bean id="SqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" value="#{DruidDataSource}"/>
+        <!--全局文件的位置-->
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        <!--指定xml映射文件的位置-->
+        <property name="mapperLocations" value="classpath:mybatis/mapper/*.xml"/>
+    </bean>
+
+    <!-- 扫描DAO持久层接口 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.xust.iot.mapper"/>
+    </bean>
+
+    <!--配置事物管理器：MyBatis使用的是原生的jdbc,所以使用DataSourceTransactionManager来管理事物-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--两种配置数据源的方式-->
+        <!-- <property name="dataSource" value="#{DruidDataSource}"/>-->
+        <constructor-arg name="dataSource" value="#{DruidDataSource}"/>
+    </bean>
+
+    <aop:config>
+        <aop:pointcut id="myPointCut" expression="execution(* com.xust.iot.service.*.*(..))"/>
+        <aop:advisor advice-ref="tx" pointcut-ref="myPointCut"/>
+    </aop:config>
+
+    <!--配置事物策略-->
+    <tx:advice id="tx">
+        <tx:attributes>
+            <tx:method name="*"/>
+            <tx:method name="update*" isolation="REPEATABLE_READ" propagation="REQUIRED"/>
+            <tx:method name="get*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--开启自动代理-->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+
+</beans>
