@@ -20,6 +20,14 @@
         insert into book(isbn,book_name,price) values(#{isbn},#{bookName},#{price})
     </insert>
 
+    <!--批量插入数据-->
+    <insert id="addBatch" parameterType="list">
+        insert into book(isbn,book_name,price) values
+        <foreach collection="books" separator="," >
+            (#{isbn},#{bookName},#{price})
+        </foreach>
+    </insert>
+
     <update id="updateBookByISBN" parameterType="com.xust.iot.bean.Book">
        update book
         <set>

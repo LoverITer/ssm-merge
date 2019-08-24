@@ -8,13 +8,21 @@
 <form action="save" method="post">
     ISBN： ${book.isbn}<br/><input type="hidden" name="isbn" value="${book.isbn}"/>
     书名：<input type="text" name="bookName" value="${book.bookName}"/><br/>
-    价格：<select name="price" ><br/>
+    价格：<select name="price"><br/>
     <c:forEach begin="10" end="100" var="price" step="1">
-        <option id="option">${price}</option>
-        元
+        <c:choose>
+            <c:when test="${price==book.price}">
+                <option selected>${price}</option>
+            </c:when>
+            <c:when test="${price!=book.price}">
+                <option>${price}</option>
+            </c:when>
+        </c:choose>
+
     </c:forEach>
-</select>
-    <button type="submit">保存</button>
+</select> 元<br/>
+
+<button type="submit">保存</button>
 </form>
 </body>
 

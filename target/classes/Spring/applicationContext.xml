@@ -46,6 +46,21 @@
         <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
         <!--指定xml映射文件的位置-->
         <property name="mapperLocations" value="classpath:mybatis/mapper/*.xml"/>
+
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <value>
+                            pageSizeZero=false
+                            helperDialect=mysql
+                            reasonable=true
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+
     </bean>
 
     <!-- 扫描DAO持久层接口 -->

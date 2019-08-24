@@ -36,6 +36,14 @@ public interface BookMapper {
      */
     public void addBook(Book book);
 
+
+    /**
+     * 批量插入
+     * @param book
+     */
+    public void addBatch(@Param("books") List<Book> book);
+
+
     /**
      * 根据isbn更新书
      * @param book

@@ -1,5 +1,7 @@
 package com.xust.iot.controller;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.xust.iot.bean.Book;
 import com.xust.iot.service.impl.BookServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +56,28 @@ public class BookController {
 
 
     @RequestMapping("/showAll")
-    public String showAllBook(Model model) {
+    public String showAllBook(@RequestParam(value = "pageNo",defaultValue = "1") Integer pageNo,Model model) {
+        //使用PageHelper.startPage(pageNo,10)进行分页，第一个参数是页码，第二个参数是每页的大小
+        PageHelper.startPage(pageNo,20,"price");
         List<Book> lists = bookService.getAll();
-        model.addAttribute("books", lists);
+
+
+
+        /**
+         * 可以有两个参数，第一个参数是查询到的结果、第二个参数是连续显示的页码数
+         */
+        PageInfo<Book> info=new PageInfo<Book>(lists,10);
+        System.out.println("总记录数："+info.getTotal());
+        System.out.println("额定每页大小："+info.getPageSize());
+        System.out.println("上一页："+info.getPrePage());
+        System.out.println("当期页："+info.getPageNum());
+        System.out.println("下一页："+info.getNextPage());
+        System.out.println("总页数："+info.getPages());
+        int[] navg=info.getNavigatepageNums();
+        for(Integer i:navg){
+            System.out.println(i);
+        }
+        model.addAttribute("info", info);
         return "bookInfo";
     }
 
